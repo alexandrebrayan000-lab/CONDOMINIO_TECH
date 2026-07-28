@@ -1,0 +1,378 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+.logo-container{
+    max-height: 80px;
+    display: flex;
+    align-items: center; 
+}
+.logo-container .logo-img{
+    height: 70px;       
+    width: auto;        
+    max-width: 200px;  
+    display: block;
+    object-fit: contain;
+
+}
+.header-unico {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;            
+    background-color: #002A55;      
+    padding: 15px 40px;
+    height: 110px;                  
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    box-sizing: border-box;
+}
+.logo-container {
+    max-height: 80px;
+    display: flex;
+    align-items: center;
+}
+.logo-container .logo-img {
+    height: 70px;       
+    width: auto;      
+    max-width: 200px;  
+    display: block;
+    object-fit: contain;
+}
+.titulo-boas-vindas {
+    color: #ffffff;
+    font-size: 24px;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+}
+.botoes-menu {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.header-unico nav {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+.btn-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 999px;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+.btn-nav:hover {
+    transform: translateY(-1px);
+}
+.btn-login {
+    background-color: #00b4d8;
+    color: #ffffff;
+    border: 2px solid transparent;
+}
+.btn-login:hover {
+    background-color: #14c6ff;
+}
+
+.btn-cadastro {
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+}
+.btn-cadastro img {
+    width: 22px;
+    height: 22px;
+    display: block;
+    filter: invert(1);      
+}
+.btn-cadastro:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+}
+main{
+    background-image: linear-gradient(rgb(255, 255, 255), rgba(0,0,0,0.2)), url('img/logoReservaTech.png');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+}
+main div{
+    background-color: rgb(255, 255, 255); 
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+}
+.texto{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+.reservas{
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    padding: 1cm;
+    gap: 20px;    
+}
+.reservas a{
+    text-decoration: none;
+    color: black;
+}
+.fig-inline{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: White;
+    padding: 1cm;
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 340px;
+}
+.fig-inline:hover{
+    transform: translateY(-10px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+    background-color: #f9f9f9;
+}
+.fig-inline img{
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    aspect-ratio: 300 / 190;
+}
+.legenda{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin-top: 10px;
+    text-align: center;
+}
+.opcoes{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+section{
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    text-decoration: none;
+    align-items: center;
+    justify-content: center;
+}
+.login{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+figure{
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    padding: 20px;
+}
+#login figure{
+    width: 100%;
+    max-width: 820px;
+    padding: 40px;
+    margin: 0 auto;
+}
+
+#login figure figcaption{
+    text-align: center;
+}
+
+
+figure h2{
+    color: #002A55;
+    font-size: 20px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 10px;
+}
+
+
+form{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 600px;
+    opacity: 1;
+}
+
+label{
+    color: #002A55;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    width: 100px;
+    text-align: left;
+    margin: 0;
+}
+
+input{
+    flex: 1;
+    min-width: 200px;
+    max-width: 420px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid rgba(0, 42, 85, 0.25);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus{
+    outline: none;
+    border-color: #00b4d8;
+    box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.25);
+}
+
+
+button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: 'apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.35);
+}
+
+.botoes-linha{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.cadastro{
+    background-color: #1A2B9D;
+    width: 50%;
+    padding: 15px;
+    border-radius: 8px;
+    border: none;
+}
+button a{
+    text-decoration: none;
+    color: white;
+}
+
+.google{
+    background-color: white;
+    width: 50px;
+    height: 50px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
+
+.ajuda{
+    margin-top: 12px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.ajuda a{
+    color: #00b4d8;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.ajuda a:hover{
+    text-decoration: underline;
+}
+
+button{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sobreSite a, .feedback a{
+    text-decoration: none;
+    font-size: 24px;
+    color: white;
+    font-family:'apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sobreSite, .feedback{
+    background-color: #1A2B9D;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sobreSite:hover, .feedback:hover{
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.35);
+}
+
+footer{
+    background-color: #1A2B9D;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Session UI and logout button (shared) */
+.session-wrapper{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.avatar-initial{
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #00b4d8;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+.btn-logout {
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+}
