@@ -1,4 +1,3 @@
-```php
 <?php
 
 session_start();
@@ -13,13 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $perfil      = trim($_POST['perfil'] ?? 'morador');
     $senha       = $_POST['senha'] ?? '';
 
-    // Valida campos essenciais
+    // Validação dos campos obrigatórios
     if (empty($nome) || empty($email) || empty($senha)) {
         header("Location: ../pages/cadastro.php?erro=campos_vazios");
         exit;
     }
 
-    // Verifica se o e-mail já existe
+    // Verifica se o e-mail já está cadastrado
     $stmt_check = $pdo->prepare("
         SELECT id
         FROM usuarios
@@ -36,12 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | BUSCA O CONDOMÍNIO ATIVO
-    |--------------------------------------------------------------------------
-    */
-
+    // Busca o condomínio ativo
     $stmt_condominio = $pdo->query("
         SELECT id
         FROM condominios
@@ -60,12 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Criptografa a senha
     $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-    /*
-    |--------------------------------------------------------------------------
-    | CADASTRA O USUÁRIO
-    |--------------------------------------------------------------------------
-    */
-
+    // Cadastra o usuário
     $sql = "
         INSERT INTO usuarios
         (
@@ -114,4 +103,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: ../pages/cadastro.php");
     exit;
 }
-```

@@ -1,16 +1,9 @@
-```php
 <?php
 
 session_start();
 require_once __DIR__ . '/../config/conexao.php';
 
-/*
-|--------------------------------------------------------------------------
-| SEGURANÇA
-|--------------------------------------------------------------------------
-*/
-
-// Apenas usuários logados como síndico podem gerenciar espaços
+// Apenas síndico
 if (
     !isset($_SESSION['usuario_id']) ||
     ($_SESSION['usuario_perfil'] ?? '') !== 'sindico'
@@ -19,62 +12,44 @@ if (
     exit;
 }
 
-// O usuário precisa estar vinculado a um condomínio
-$condominio_id = $_SESSION['usuario_condominio_id'] ?? null;
+// Descobre o condomínio do síndico
+$stmt = $pdo->prepare("
+    SELECT condominio_id
+    FROM usuarios
+    WHERE id = :usuario_id
+");
 
-if (!$condominio_id) {
-    header("Location: ../pages/espacos.php?erro=condominio_nao_identificado");
-    exit;
+$stmt->execute([
+    ':usuario_id' => $_SESSION['usuario_id']
+]);
+
+$usuario = $stmt->fetch();
+
+if (!$usuario || !$usuario['condominio_id']) {
+    die("Condomínio não encontrado.");
 }
 
-// Só aceita requisições POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: ../pages/espacos.php");
-    exit;
-}
+$condominio_id = $usuario['condominio_id'];
 
-$acao = $_POST['acao'] ?? '';
 
-/*
-|--------------------------------------------------------------------------
-| CADASTRAR ESPAÇO
-|--------------------------------------------------------------------------
-*/
+// ============================
+// CADASTRAR ESPAÇO
+// ============================
 
-if ($acao === 'cadastrar') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nome = trim($_POST['nome'] ?? '');
     $descricao = trim($_POST['descricao'] ?? '');
     $capacidade = $_POST['capacidade'] ?? null;
 
-    // Checkbox marcado = ativo
-    // Checkbox desmarcado = inativo
-    $ativo = isset($_POST['ativo']) ? 1 : 0;
-
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDAÇÃO DO NOME
-    |--------------------------------------------------------------------------
-    */
-
     if ($nome === '') {
-        header("Location: ../pages/espacos.php?erro=nome_obrigatorio");
+        header("Location: ../pages/espacos.php?erro=nome");
         exit;
     }
 
-    if (mb_strlen($nome) > 100) {
-        header("Location: ../pages/espacos.php?erro=nome_longo");
-        exit;
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDAÇÃO DA CAPACIDADE
-    |--------------------------------------------------------------------------
-    */
-
-    if ($capacidade !== '' && $capacidade !== null) {
-
+    if ($capacidade === '') {
+        $capacidade = null;
+    } else {
         $capacidade = filter_var(
             $capacidade,
             FILTER_VALIDATE_INT,
@@ -86,92 +61,103 @@ if ($acao === 'cadastrar') {
         );
 
         if ($capacidade === false) {
-            header("Location: ../pages/espacos.php?erro=capacidade_invalida");
+            header("Location: ../pages/espacos.php?erro=capacidade");
             exit;
         }
-
-    } else {
-
-        $capacidade = null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | VERIFICA SE JÁ EXISTE UM ESPAÇO COM O MESMO NOME
-    |--------------------------------------------------------------------------
-    */
-
-    $stmt_existente = $pdo->prepare("
+    // Verifica se já existe espaço com o mesmo nome
+    $stmt = $pdo->prepare("
         SELECT id
         FROM espacos
         WHERE condominio_id = :condominio_id
         AND nome = :nome
-        LIMIT 1
     ");
 
-    $stmt_existente->execute([
+    $stmt->execute([
         ':condominio_id' => $condominio_id,
         ':nome' => $nome
     ]);
 
-    if ($stmt_existente->fetch()) {
-        header("Location: ../pages/espacos.php?erro=espaco_existente");
+    if ($stmt->fetch()) {
+        header("Location: ../pages/espacos.php?erro=existente");
         exit;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CADASTRA O ESPAÇO
-    |--------------------------------------------------------------------------
-    */
+    // Cadastra o espaço
+    $stmt = $pdo->prepare("
+        INSERT INTO espacos
+        (
+            condominio_id,
+            nome,
+            descricao,
+            capacidade,
+            ativo
+        )
+        VALUES
+        (
+            :condominio_id,
+            :nome,
+            :descricao,
+            :capacidade,
+            1
+        )
+    ");
 
-    try {
+    $stmt->execute([
+        ':condominio_id' => $condominio_id,
+        ':nome' => $nome,
+        ':descricao' => $descricao !== '' ? $descricao : null,
+        ':capacidade' => $capacidade
+    ]);
 
-        $sql = "
-            INSERT INTO espacos
-            (
-                condominio_id,
-                nome,
-                descricao,
-                capacidade,
-                ativo
-            )
-            VALUES
-            (
-                :condominio_id,
-                :nome,
-                :descricao,
-                :capacidade,
-                :ativo
-            )
-        ";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            ':condominio_id' => $condominio_id,
-            ':nome'          => $nome,
-            ':descricao'     => $descricao !== '' ? $descricao : null,
-            ':capacidade'    => $capacidade,
-            ':ativo'         => $ativo
-        ]);
-
-        header("Location: ../pages/espacos.php?sucesso=1");
-        exit;
-
-    } catch (PDOException $e) {
-
-        header("Location: ../pages/espacos.php?erro=falha_cadastro");
-        exit;
-    }
+    header("Location: ../pages/espacos.php?sucesso=1");
+    exit;
 }
 
-/*
-|--------------------------------------------------------------------------
-| AÇÃO INVÁLIDA
-|--------------------------------------------------------------------------
-*/
 
-header("Location: ../pages/espacos.php?erro=acao_invalida");
+// ============================
+// ATIVAR / DESATIVAR ESPAÇO
+// ============================
+
+if (isset($_GET['acao'], $_GET['id'])) {
+
+    $acao = $_GET['acao'];
+    $id = filter_var($_GET['id'], FILTER_VALIDATE_INT);
+
+    if (!$id) {
+        header("Location: ../pages/espacos.php");
+        exit;
+    }
+
+    if ($acao === 'ativar') {
+        $novo_status = 1;
+    } elseif ($acao === 'desativar') {
+        $novo_status = 0;
+    } else {
+        header("Location: ../pages/espacos.php");
+        exit;
+    }
+
+    // Só altera espaços pertencentes ao condomínio do síndico
+    $stmt = $pdo->prepare("
+        UPDATE espacos
+        SET ativo = :ativo
+        WHERE id = :id
+        AND condominio_id = :condominio_id
+    ");
+
+    $stmt->execute([
+        ':ativo' => $novo_status,
+        ':id' => $id,
+        ':condominio_id' => $condominio_id
+    ]);
+
+    header("Location: ../pages/espacos.php?sucesso=status");
+    exit;
+}
+
+
+// Se chegar aqui sem nenhuma ação
+header("Location: ../pages/espacos.php");
 exit;
-```

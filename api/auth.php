@@ -1,4 +1,3 @@
-```php
 <?php
 
 session_start();
@@ -14,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Busca o usuário no banco, incluindo o condomínio ao qual pertence
+    // Busca o usuário no banco
     $stmt = $pdo->prepare("
         SELECT
             id,
@@ -37,10 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $usuario = $stmt->fetch();
 
-    // Valida a senha
+    // Verifica a senha
     if ($usuario && password_verify($senha, $usuario['senha'])) {
 
-        // Guarda os dados do usuário na sessão
+        // Dados do usuário
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['usuario_condominio_id'] = $usuario['condominio_id'];
         $_SESSION['usuario_nome'] = $usuario['nome'];
@@ -49,14 +48,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['usuario_bloco'] = $usuario['bloco'];
         $_SESSION['usuario_apto'] = $usuario['apartamento'];
 
-        // Redireciona conforme o perfil
+        // Redirecionamento conforme o perfil
         if ($usuario['perfil'] === 'sindico') {
-            header("Location: ../pages/dashboard-sindico.php");
-        } else {
-            header("Location: ../index.php");
-        }
 
-        exit;
+            header("Location: ../pages/dashboard-sindico.php");
+            exit;
+
+        } else {
+
+            header("Location: ../index.php");
+            exit;
+        }
 
     } else {
 
@@ -69,4 +71,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header("Location: ../pages/login.php");
     exit;
 }
-```
