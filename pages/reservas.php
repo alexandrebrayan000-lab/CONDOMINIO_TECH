@@ -9,7 +9,7 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 // Busca os espaços disponíveis no banco
-$stmt = $pdo->query("SELECT * FROM espacos WHERE status = 'disponivel'");
+$stmt = $pdo->query("SELECT * FROM espacos WHERE ativo = 1 ORDER BY nome ASC");
 $espacos = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
