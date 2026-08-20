@@ -38,7 +38,7 @@ export function DashboardLayout({ children, userType = 'morador' }: DashboardLay
                 <Link href="/reservas" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
                   Reservas
                 </Link>
-                <Link href="/avisos" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
+                <Link href="/dashboard/avisos" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
                   Avisos
                 </Link>
               </>
