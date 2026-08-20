@@ -19,7 +19,7 @@ type ReservaType = {
   espaco: EspacoType;
 };
 
-export default async function ReservasPage() {
+export default async function DashboardPage() {
   const espacos: EspacoType[] = await getEspacos();
   const reservas: ReservaType[] = await getReservas();
 
@@ -74,15 +74,15 @@ export default async function ReservasPage() {
           </form>
         </Card>
 
-        {/* Coluna da Direita: Espaços Cadastrados e Reservas Salvas */}
+        {/* Coluna da Direita: Reservas e Espaços */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           
-          {/* Reservas Gravadas no Banco */}
+          {/* Agendamentos do Condomínio */}
           <div>
-            <h2 className="text-base font-semibold text-white mb-3">Agendamentos Gravados no Banco (SQLite)</h2>
+            <h2 className="text-base font-semibold text-white mb-3">Agendamentos Confirmados</h2>
             {reservas.length === 0 ? (
-              <Card>
-                <p className="text-xs text-slate-400">Nenhuma reserva cadastrada no banco até o momento.</p>
+              <Card className="p-4 text-center">
+                <p className="text-xs text-slate-400">Nenhuma reserva realizada até o momento.</p>
               </Card>
             ) : (
               <div className="flex flex-col gap-3">
@@ -91,11 +91,11 @@ export default async function ReservasPage() {
                     <div>
                       <p className="font-semibold text-sm text-white">{reserva.espaco.nome}</p>
                       <p className="text-xs text-slate-400">
-                        Morador: <span className="text-slate-200">{reserva.nomeMorador}</span> • Data: {new Date(reserva.data).toLocaleDateString('pt-BR')}
+                        Morador: <span className="text-slate-200">{reserva.nomeMorador}</span> • Data: {new Date(reserva.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                       </p>
                     </div>
                     <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      Salvo no Banco
+                      Confirmado
                     </span>
                   </Card>
                 ))}
@@ -103,18 +103,18 @@ export default async function ReservasPage() {
             )}
           </div>
 
-          {/* Espaços do Condomínio vindo do Banco */}
+          {/* Espaços Disponíveis */}
           <div>
             <h2 className="text-base font-semibold text-white mb-3">Espaços Disponíveis</h2>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {espacos.map((espaco: EspacoType) => (
-                <Card key={espaco.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <Card key={espaco.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                   <div>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                       Capacidade: {espaco.capacidade} Pessoas
                     </span>
-                    <h3 className="text-lg font-bold text-white mt-1">{espaco.nome}</h3>
-                    <p className="text-xs text-slate-400 mt-1">{espaco.descricao}</p>
+                    <h3 className="text-sm font-bold text-white mt-1">{espaco.nome}</h3>
+                    <p className="text-xs text-slate-400 mt-0.5">{espaco.descricao}</p>
                   </div>
                 </Card>
               ))}

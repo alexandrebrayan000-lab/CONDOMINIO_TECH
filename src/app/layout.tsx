@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={plusJakartaSans.variable}>
+    <html lang="pt-BR" className={plusJakartaSans.variable} suppressHydrationWarning>
       <body className="font-sans antialiased bg-slate-950 text-slate-100">
         {children}
       </body>

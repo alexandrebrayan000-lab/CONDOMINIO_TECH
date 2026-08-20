@@ -7,19 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String    @id @default(uuid())
+  nome      String
+  email     String    @unique
+  senha     String
+  tipo      String    @default("MORADOR") // "MORADOR" ou "SINDICO"
+  reservas  Reserva[]
+  createdAt DateTime  @default(now())
+}
+
 model Espaco {
-  id          String    @id @default(uuid())
-  nome        String
-  descricao   String
-  capacidade  Int
-  reservas    Reserva[]
-  createdAt   DateTime  @default(now())
+  id         String    @id @default(uuid())
+  nome       String
+  descricao  String
+  capacidade Int
+  reservas   Reserva[]
+  createdAt  DateTime  @default(now())
 }
 
 model Reserva {
   id          String   @id @default(uuid())
   espacoId    String
   espaco      Espaco   @relation(fields: [espacoId], references: [id])
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
   nomeMorador String
   data        DateTime
   createdAt   DateTime @default(now())
