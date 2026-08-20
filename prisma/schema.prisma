@@ -36,3 +36,10 @@ model Reserva {
   data        DateTime
   createdAt   DateTime @default(now())
 }
+
+model Aviso {
+  id          String @id @default(uuid())
+  titulo      String
+  conteudo    String
+  createdAt   DateTime @default(now())
+}
