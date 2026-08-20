@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { fazerLogout } from '@/lib/auth-actions';
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -15,15 +16,20 @@ export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLay
     MORADOR: [
       { label: '📅 Minhas Reservas', href: '/dashboard' },
       { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
+      { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },
     ],
     SINDICO: [
       { label: '📊 Painel Geral', href: '/dashboard/admin' },
       { label: '📅 Todas as Reservas', href: '/dashboard' },
-      { label: '📢 Publicar Avisos', href: '/dashboard/avisos' },
+      { label: '📝 Publicar Avisos', href: '/dashboard/admin/avisos' },
+      { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
+      { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },
     ],
     PORTARIA: [
       { label: '📋 Reservas do Dia', href: '/dashboard/portaria' },
-      { label: '📢 Avisos Gerais', href: '/dashboard/avisos' },
+      { label: '📝 Publicar Avisos', href: '/dashboard/admin/avisos' },
+      { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
+      { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },
     ],
   };
 
@@ -38,7 +44,7 @@ export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLay
               CondomínioTech
             </span>
             <div className="mt-2 px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/20 rounded text-[10px] font-semibold text-cyan-400 w-fit uppercase">
-              Acesso: {userType}
+              Operador: {userType}
             </div>
           </div>
 
@@ -62,12 +68,13 @@ export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLay
           </nav>
         </div>
 
-        <Link
-          href="/login"
-          className="text-xs text-red-400 hover:text-red-300 font-medium px-3 py-2 rounded-lg hover:bg-red-500/10 transition"
+        {/* Botão de Logout Funcional */}
+        <button
+        onClick={async () => await fazerLogout()}
+        className="text-left text-xs text-red-400 hover:text-red-300 font-medium px-3 py-2 rounded-lg hover:bg-red-500/10 transition w-full cursor-pointer"
         >
-          🚪 Sair do Sistema
-        </Link>
+        🚪 Sair do Sistema
+        </button>
       </aside>
 
       <main className="flex-1 p-8 overflow-y-auto">{children}</main>

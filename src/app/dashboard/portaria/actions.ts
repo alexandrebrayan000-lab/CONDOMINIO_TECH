@@ -1,0 +1,26 @@
+'use server';
+
+import { prisma } from '@/lib/prisma';
+
+export async function getReservasDoDia() {
+  const hojeInicio = new Date();
+  hojeInicio.setHours(0, 0, 0, 0);
+
+  const hojeFim = new Date();
+  hojeFim.setHours(23, 59, 59, 999);
+
+  return await prisma.reserva.findMany({
+    where: {
+      data: {
+        gte: hojeInicio,
+        lte: hojeFim,
+      },
+    },
+    include: {
+      user: {
+        select: { nome: true, email: true },
+      },
+    },
+    orderBy: { data: 'asc' },
+  });
+}

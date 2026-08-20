@@ -1,22 +1,32 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { email, senha } = await request.json();
 
-    const user = await prisma.user.findUnique({
+    const usuario = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (!user || user.senha !== password) {
-      return NextResponse.json({ message: 'E-mail ou senha incorretos' }, { status: 401 });
+    if (!usuario || usuario.senha !== senha) {
+      return NextResponse.json({ error: 'Credenciais inválidas' }, { status: 401 });
     }
 
-    return NextResponse.json({ message: 'Login realizado com sucesso', user }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ message: 'Erro interno no servidor' }, { status: 500 });
-  }
+    // Cria a resposta e grava o cookie nela de forma limpa
+    const response = NextResponse.json({ success: true, tipo: usuario.tipo });
+
+    response.cookies.set('session_user_id', usuario.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 dias
+    });
+
+    return response;
+    } catch (error) {
+      console.error('Erro na autenticação:', error);
+      return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 });
+    }
 }
