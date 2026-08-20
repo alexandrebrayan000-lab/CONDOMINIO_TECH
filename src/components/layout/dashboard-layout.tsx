@@ -1,76 +1,76 @@
-import React from 'react';
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-interface DashboardLayoutProps {
+type DashboardLayoutProps = {
   children: React.ReactNode;
-  userType?: 'morador' | 'sindico';
-}
+  userType?: 'MORADOR' | 'SINDICO' | 'PORTARIA';
+};
 
-export function DashboardLayout({ children, userType = 'morador' }: DashboardLayoutProps) {
+export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLayoutProps) {
+  const pathname = usePathname();
+
+  const menus = {
+    MORADOR: [
+      { label: '📅 Minhas Reservas', href: '/dashboard' },
+      { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
+    ],
+    SINDICO: [
+      { label: '📊 Painel Geral', href: '/dashboard/admin' },
+      { label: '📅 Todas as Reservas', href: '/dashboard' },
+      { label: '📢 Publicar Avisos', href: '/dashboard/avisos' },
+    ],
+    PORTARIA: [
+      { label: '📋 Reservas do Dia', href: '/dashboard/portaria' },
+      { label: '📢 Avisos Gerais', href: '/dashboard/avisos' },
+    ],
+  };
+
+  const navItems = menus[userType] || menus.MORADOR;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
-      
-      {/* Sidebar Lateral */}
-      <aside className="w-full md:w-64 bg-slate-900/60 border-r border-slate-800/80 p-6 flex flex-col justify-between shrink-0">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+      <aside className="w-64 bg-slate-900 border-r border-slate-800 p-6 flex flex-col justify-between">
         <div>
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-slate-950 font-bold text-base shadow-lg shadow-cyan-500/20">
-              CT
-            </div>
-            <span className="font-bold text-lg tracking-tight text-white">
-              Condomínio<span className="text-cyan-400">Tech</span>
+          <div className="mb-6">
+            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              CondomínioTech
             </span>
-          </Link>
-
-          {/* Tag de Perfil */}
-          <div className="mb-6 px-3 py-1.5 rounded-lg bg-slate-800/60 border border-slate-700/50 text-xs font-medium text-slate-400">
-            Perfil: <span className="text-cyan-400 capitalize">{userType}</span>
+            <div className="mt-2 px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/20 rounded text-[10px] font-semibold text-cyan-400 w-fit uppercase">
+              Acesso: {userType}
+            </div>
           </div>
 
-          {/* Links de Navegação */}
-          <nav className="flex flex-col gap-1 text-sm font-medium">
-            {userType === 'morador' ? (
-              <>
-                <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  Dashboard
+          <nav className="flex flex-col gap-2">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+                    isActive
+                      ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                  }`}
+                >
+                  {item.label}
                 </Link>
-                <Link href="/reservas" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
-                  Reservas
-                </Link>
-                <Link href="/dashboard/avisos" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
-                  Avisos
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/sindico/dashboard" className="px-3 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  Painel Síndico
-                </Link>
-                <Link href="/sindico/espacos" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
-                  Gerenciar Espaços
-                </Link>
-                <Link href="/sindico/reservas" className="px-3 py-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-slate-800/50 transition-colors">
-                  Todas as Reservas
-                </Link>
-              </>
-            )}
+              );
+            })}
           </nav>
         </div>
 
-        {/* Rodapé da Sidebar */}
-        <div className="pt-6 border-t border-slate-800/80">
-          <Link href="/login" className="text-xs text-rose-400 hover:underline flex items-center gap-1">
-            Sair da conta
-          </Link>
-        </div>
+        <Link
+          href="/login"
+          className="text-xs text-red-400 hover:text-red-300 font-medium px-3 py-2 rounded-lg hover:bg-red-500/10 transition"
+        >
+          🚪 Sair do Sistema
+        </Link>
       </aside>
 
-      {/* Conteúdo Principal */}
-      <main className="flex-1 p-6 md:p-10 max-w-7xl">
-        {children}
-      </main>
-
+      <main className="flex-1 p-8 overflow-y-auto">{children}</main>
     </div>
   );
 }
