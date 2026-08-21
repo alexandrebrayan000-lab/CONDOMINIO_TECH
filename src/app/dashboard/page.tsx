@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function DashboardMorador() {
   return (
-    <DashboardLayout userType="morador">
+    <DashboardLayout userType="MORADOR">
       {/* Cabeçalho de Boas-vindas */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -14,7 +14,7 @@ export default function DashboardMorador() {
             Condomínio Tech • Bloco A, Apto 102
           </p>
         </div>
-        <Link href="/reservas">
+        <Link href="/dashboard/reservas">
           <Button size="sm">+ Nova Reserva</Button>
         </Link>
       </div>
