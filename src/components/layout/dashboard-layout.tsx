@@ -14,7 +14,8 @@ export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLay
 
   const menus = {
     MORADOR: [
-      { label: '📅 Minhas Reservas', href: '/dashboard' },
+      { label: '📊 Painel Geral', href: '/dashboard' },
+      { label: '📅 Minhas Reservas', href: '/dashboard/reservas' },
       { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
       { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },
     ],
