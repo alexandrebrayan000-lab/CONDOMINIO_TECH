@@ -43,3 +43,8 @@ model Aviso {
   conteudo    String
   createdAt   DateTime @default(now())
 }
+enum Role {
+  MORADOR
+  SINDICO
+  PORTARIA
+}
