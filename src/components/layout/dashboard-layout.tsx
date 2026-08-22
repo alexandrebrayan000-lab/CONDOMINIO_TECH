@@ -16,12 +16,14 @@ export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLay
     MORADOR: [
       { label: '📊 Painel Geral', href: '/dashboard' },
       { label: '📅 Minhas Reservas', href: '/dashboard/reservas' },
+      { label: '📝 Abrir ocorrência', href: '/dashboard/ocorrencias' },
       { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
       { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },
     ],
     SINDICO: [
       { label: '📊 Painel Geral', href: '/dashboard/admin' },
       { label: '📅 Todas as Reservas', href: '/dashboard' },
+      { label: '📋 Ocorrências', href: '/dashboard/admin/ocorrencias' },
       { label: '📝 Publicar Avisos', href: '/dashboard/admin/avisos' },
       { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
       { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },

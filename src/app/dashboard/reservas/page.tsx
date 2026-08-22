@@ -1,110 +1,72 @@
 import { redirect } from 'next/navigation';
 import { getUsuarioLogado } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { FormReserva } from './form-reserva'; // Componente do formulário
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { criarReserva, getDadosReservas } from './actions';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ReservasPage() {
   const usuario = await getUsuarioLogado();
   if (!usuario) redirect('/login');
 
-  const { espacos, reservas } = await getDadosReservas();
+  // 1. Busca APENAS as reservas do morador logado para a listagem
+  const minhasReservas = await prisma.reserva.findMany({
+    where: { userId: usuario.id },
+    include: { espaco: true },
+    orderBy: { data: 'asc' },
+  });
+
+  // 2. Busca TODAS as reservas cadastradas para calcular ocupação de horários
+  const todasReservas = await prisma.reserva.findMany({
+    select: { espacoId: true, data: true, horario: true },
+  });
+
+  // 3. Busca lista de espaços disponíveis
+  const espacos = await prisma.espaco.findMany();
 
   return (
     <DashboardLayout userType={usuario.tipo as 'MORADOR' | 'PORTARIA' | 'SINDICO'}>
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Reservas de Espaços</h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Agende salão de festas, churrasqueira e outros ambientes do condomínio.
-          </p>
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold text-white mb-6">Agendamento de Espaços</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulário de Nova Reserva */}
-        <Card className="p-6 lg:col-span-1 h-fit">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-            Nova Reserva
-          </h2>
+        {/* Formulário com seleção de horários disponíveis */}
+        <div className="lg:col-span-1">
+          <FormReserva espacos={espacos} todasReservas={todasReservas} />
+        </div>
 
-          <form action={criarReserva} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-slate-300">Escolha o Espaço</label>
-              <select
-                name="espacoId"
-                required
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
-              >
-                <option value="">Selecione um espaço...</option>
-                {espacos.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.nome} (Capacidade: {e.capacidade} pessoas)
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-slate-300">Data da Reserva</label>
-              <input
-                type="date"
-                name="data"
-                required
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
-              />
-            </div>
-
-            <Button type="submit" size="md" className="w-full mt-2">
-              Confirmar Reserva
-            </Button>
-          </form>
-        </Card>
-
-        {/* Tabela de Reservas Agendadas */}
-        <Card className="p-6 lg:col-span-2">
-          <h2 className="text-lg font-semibold text-white mb-4">Minhas Reservas e Próximos Eventos</h2>
-
-          {reservas.length === 0 ? (
-            <div className="py-12 text-center text-slate-500 text-sm">
-              Nenhuma reserva cadastrada até o momento.
-            </div>
+        {/* Minhas Reservas (Apenas do Morador Logado) */}
+        <div className="lg:col-span-2">
+          <h2 className="text-lg font-semibold text-white mb-4">Minhas Reservas</h2>
+          {minhasReservas.length === 0 ? (
+            <Card className="p-6 text-center text-slate-400 text-sm">
+              Você não possui agendamentos ativos.
+            </Card>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-900 border-b border-slate-800">
-                  <tr>
-                    <th className="py-3 px-4">Espaço</th>
-                    <th className="py-3 px-4">Morador</th>
-                    <th className="py-3 px-4">Data</th>
-                    <th className="py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {reservas.map((r) => (
-                    <tr key={r.id} className="hover:bg-slate-900/40">
-                      <td className="py-3 px-4 font-semibold text-cyan-400 capitalize">
-                        {r.espaco?.nome || r.espacoId}
-                      </td>
-                      <td className="py-3 px-4 font-medium text-white">{r.user?.nome || 'Morador'}</td>
-                      <td className="py-3 px-4 text-slate-300">
-                        {new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-1 text-[10px] font-bold bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20">
-                          CONFIRMADA
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex flex-col gap-3">
+              {minhasReservas.map((reserva) => (
+                <Card key={reserva.id} className="p-4 bg-slate-900 border-slate-800">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold text-white">{reserva.espaco.nome}</p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Data:{' '}
+                        {new Date(reserva.data).toLocaleDateString('pt-BR', {
+                          timeZone: 'UTC',
+                        })}{' '}
+                        • Horário: <span className="text-cyan-400">{reserva.horario}</span>
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Confirmada
+                    </span>
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
-        </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
