@@ -12,7 +12,7 @@ export async function getEstatisticasAdmin() {
     prisma.aviso.count(),
     prisma.reserva.findMany({
       take: 5,
-      orderBy: { data: 'desc' },
+      orderBy: { dataInicio: 'desc' },
       include: {
         user: {
           select: { nome: true, email: true },

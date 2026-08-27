@@ -3,6 +3,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
+import { Role } from '@prisma/client';
 
 export async function atualizarTipoUsuario(formData: FormData) {
   const userId = formData.get('userId') as string;
@@ -12,7 +13,9 @@ export async function atualizarTipoUsuario(formData: FormData) {
 
   await prisma.user.update({
     where: { id: userId },
-    data: { tipo: novoTipo },
+    data: { 
+      tipo: novoTipo as Role,
+    },
   });
 
   revalidatePath('/dashboard', 'layout');

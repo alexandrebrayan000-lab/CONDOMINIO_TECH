@@ -59,7 +59,6 @@ export default function CadastroPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center px-4 py-12 selection:bg-cyan-500 selection:text-slate-950">
       <div className="w-full max-w-md">
         <div className="text-center mb-8 flex flex-col items-center">
-          {/* Logo Oficial substituindo a escrita antiga */}
           <Link href="/" className="inline-block mb-4 hover:scale-105 transition-transform">
             <Image
               src="/logo.png"
@@ -103,7 +102,6 @@ export default function CadastroPage() {
               required
             />
 
-            {/* Campos de Bloco e Apartamento em lado a lado */}
             <div className="grid grid-cols-2 gap-4">
               <Input 
                 label="Bloco"
@@ -154,7 +152,7 @@ export default function CadastroPage() {
             </span>
           </div>
 
-          <Link href="/login">
+          <Link href="/login" className="w-full">
             <Button variant="outline" className="w-full">
               Fazer Login
             </Button>

@@ -33,7 +33,7 @@ export default async function DashboardMorador() {
       espaco: true,
     },
     orderBy: {
-      data: 'asc',
+      dataInicio: 'asc',
     },
   });
 
@@ -71,7 +71,7 @@ export default async function DashboardMorador() {
           </p>
           <p className="text-xs text-cyan-400 mt-1">
             {proximaReserva
-              ? new Date(proximaReserva.data).toLocaleDateString('pt-BR', {
+              ? new Date(proximaReserva.dataInicio).toLocaleDateString('pt-BR', {
                   timeZone: 'UTC',
                 })
               : 'Faça um agendamento'}
@@ -119,7 +119,7 @@ export default async function DashboardMorador() {
                     </p>
                     <p className="text-xs text-slate-400">
                       Data:{' '}
-                      {new Date(reserva.data).toLocaleDateString('pt-BR', {
+                      {new Date(reserva.dataFim).toLocaleDateString('pt-BR', {
                         timeZone: 'UTC',
                       })}{' '}
                       • Capacidade: {reserva.espaco?.capacidade || 50} pessoas
