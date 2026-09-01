@@ -1,22 +1,16 @@
-import { redirect } from 'next/navigation';
 import { getUsuarioLogado } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Card } from '@/components/ui/card';
+import FormReserva from './form-reserva';
 import { getReservas } from './actions';
+import { Card } from '@/components/ui/card';
 
-type ReservaType = {
+interface ReservaItem {
   id: string;
+  espacoId: string;
   dataInicio: Date;
   dataFim: Date;
-  espaco: {
-    nome: string;
-  };
-  user?: {
-    nome: string;
-    bloco?: string | null;
-    apartamento?: string | null;
-  };
-};
+}
 
 export default async function ReservasPage() {
   const usuario = await getUsuarioLogado();
@@ -25,37 +19,36 @@ export default async function ReservasPage() {
     redirect('/login');
   }
 
-  const reservas: ReservaType[] = await getReservas();
+  const reservas: ReservaItem[] = await getReservas();
 
   return (
     <DashboardLayout userType={usuario.tipo as 'MORADOR' | 'SINDICO' | 'PORTARIA'}>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Minhas Reservas</h1>
+        <h1 className="text-2xl font-bold text-white">Reservas de Espaços</h1>
         <p className="text-sm text-slate-400 mt-1">
-          Acompanhe os agendamentos dos espaços comuns do condomínio.
+          Agende o salão de festas, churrasqueira ou quadra do condomínio.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormReserva />
+
+      <div className="space-y-4 max-w-4xl">
+        <h2 className="text-lg font-semibold text-white">Sustentação de Reservas</h2>
         {reservas.length === 0 ? (
-          <Card className="p-6 text-center col-span-2">
-            <p className="text-sm text-slate-400">Nenhuma reserva encontrada.</p>
-          </Card>
+          <Card className="p-6 text-center text-slate-400">Nenhuma reserva encontrada.</Card>
         ) : (
           reservas.map((reserva) => (
-            <Card key={reserva.id} className="p-5 flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <h3 className="font-bold text-white">{reserva.espaco.nome}</h3>
-                <span className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">
-                  {new Date(reserva.dataInicio).toLocaleDateString('pt-BR')}
+            <Card key={reserva.id} className="p-4 bg-slate-900 border-slate-800 flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-white">{reserva.espacoId}</h3>
+                <span className="text-sm text-slate-400 mt-1 block">
+                  Início: {new Date(reserva.dataInicio).toLocaleString('pt-BR')} <br />
+                  Fim: {new Date(reserva.dataFim).toLocaleString('pt-BR')}
                 </span>
               </div>
-              
-              {reserva.user && (
-                <p className="text-xs text-slate-400">
-                  Reservado por: {reserva.user.nome} (B. {reserva.user.bloco ?? '-'} / Apt {reserva.user.apartamento ?? '-'})
-                </p>
-              )}
+              <span className="text-xs bg-cyan-900/50 text-cyan-400 border border-cyan-800 px-3 py-1.5 rounded font-semibold">
+                Confirmada
+              </span>
             </Card>
           ))
         )}

@@ -16,7 +16,7 @@ export function DashboardLayout({ children, userType = 'MORADOR' }: DashboardLay
     MORADOR: [
       { label: '📊 Painel Geral', href: '/dashboard' },
       { label: '📅 Minhas Reservas', href: '/dashboard/reservas' },
-      { label: '📝 Abrir ocorrência', href: '/dashboard/chamadas/morador' },
+      { label: '📝 Abrir ocorrência', href: '/dashboard/chamadas' },
       { label: '📢 Mural de Avisos', href: '/dashboard/avisos' },
       { label: '⚙️ Configurações', href: '/dashboard/configuracoes' },
     ],
