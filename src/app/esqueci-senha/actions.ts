@@ -17,7 +17,7 @@ export async function solicitarRedefinicaoSenha(formData: FormData) {
       where: { email },
     });
 
-    // Para evitar enumeração de usuários, retornamos sucesso genérico mesmo se não existir
+    // Para evitar enumeração de usuários, retornamos mensagem amigável mesmo se não existir
     if (!usuario) {
       return {
         success: true,
@@ -26,22 +26,40 @@ export async function solicitarRedefinicaoSenha(formData: FormData) {
     }
 
     // 2. Remove tokens anteriores não utilizados deste e-mail
-    await prisma.passwordResetToken.deleteMany({
-      where: { email },
-    });
+    try {
+      if ('passwordResetToken' in prisma && typeof (prisma as unknown as { passwordResetToken?: { deleteMany: unknown } }).passwordResetToken?.deleteMany === 'function') {
+        await (prisma as unknown as { passwordResetToken: { deleteMany: (args: { where: { email: string } }) => Promise<unknown> } }).passwordResetToken.deleteMany({
+          where: { email },
+        });
+      } else {
+        await prisma.$executeRaw`DELETE FROM "PasswordResetToken" WHERE email = ${email}`;
+      }
+    } catch {
+      await prisma.$executeRaw`DELETE FROM "PasswordResetToken" WHERE email = ${email}`;
+    }
 
     // 3. Gera um token aleatório e expiração de 1 hora
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
+    const id = crypto.randomUUID();
 
-    // 4. Salva no banco
-    await prisma.passwordResetToken.create({
-      data: {
-        email,
-        token,
-        expiresAt,
-      },
-    });
+    // 4. Salva no banco (compatível com prisma client estático ou consulta direta)
+    try {
+      if ('passwordResetToken' in prisma && typeof (prisma as unknown as { passwordResetToken?: { create: unknown } }).passwordResetToken?.create === 'function') {
+        await (prisma as unknown as { passwordResetToken: { create: (args: { data: { id: string; email: string; token: string; expiresAt: Date } }) => Promise<unknown> } }).passwordResetToken.create({
+          data: {
+            id,
+            email,
+            token,
+            expiresAt,
+          },
+        });
+      } else {
+        await prisma.$executeRaw`INSERT INTO "PasswordResetToken" ("id", "email", "token", "expiresAt", "createdAt") VALUES (${id}, ${email}, ${token}, ${expiresAt}, NOW())`;
+      }
+    } catch {
+      await prisma.$executeRaw`INSERT INTO "PasswordResetToken" ("id", "email", "token", "expiresAt", "createdAt") VALUES (${id}, ${email}, ${token}, ${expiresAt}, NOW())`;
+    }
 
     // 5. Dispara o e-mail
     await enviarEmailRedefinicao(email, token);

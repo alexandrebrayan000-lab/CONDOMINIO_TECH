@@ -1,21 +1,89 @@
 import nodemailer from 'nodemailer';
 
-const host = process.env.EMAIL_SERVER_HOST;
-const port = Number(process.env.EMAIL_SERVER_PORT) || 587;
-const user = process.env.EMAIL_SERVER_USER;
-const pass = process.env.EMAIL_SERVER_PASSWORD;
-const from = process.env.EMAIL_FROM || '"CondomínioTech" <nao-responda@condominiotech.com>';
+/**
+ * Cria a instância de transporte do Nodemailer de acordo com as variáveis do ambiente (.env).
+ * Suporta tanto EMAIL_SERVICE (ex: "gmail", "hotmail") quanto host SMTP customizado.
+ */
+export function criarTransporter() {
+  const service = process.env.EMAIL_SERVICE?.trim();
+  const host = process.env.EMAIL_SERVER_HOST?.trim();
+  const port = Number(process.env.EMAIL_SERVER_PORT) || 587;
+  const secure = process.env.EMAIL_SERVER_SECURE === 'true' || port === 465;
+  const user = process.env.EMAIL_SERVER_USER?.trim();
+  // Se for senha de app do Google (16 caracteres com espaços), removemos os espaços automaticamente
+  const pass = process.env.EMAIL_SERVER_PASSWORD?.trim().replace(/\s+/g, '');
 
-export const mailTransporter = nodemailer.createTransport({
-  host: host || 'smtp.ethereal.email',
-  port: port,
-  secure: port === 465,
-  auth: user && pass ? { user, pass } : undefined,
-});
+  if (service) {
+    return nodemailer.createTransport({
+      service,
+      auth: user && pass ? { user, pass } : undefined,
+    });
+  }
 
+  return nodemailer.createTransport({
+    host: host || 'smtp.gmail.com',
+    port,
+    secure,
+    auth: user && pass ? { user, pass } : undefined,
+  });
+}
+
+export const mailTransporter = criarTransporter();
+
+/**
+ * Verifica se as credenciais mínimas de envio de e-mail estão preenchidas no .env
+ */
+export function isEmailConfigured(): boolean {
+  const user = process.env.EMAIL_SERVER_USER?.trim();
+  const pass = process.env.EMAIL_SERVER_PASSWORD?.trim();
+  return Boolean(user && pass);
+}
+
+/**
+ * Testa a conexão e autenticação com o servidor SMTP.
+ */
+export async function verificarConexaoEmail(): Promise<{ ok: boolean; message: string }> {
+  if (!isEmailConfigured()) {
+    return {
+      ok: false,
+      message: 'Credenciais de e-mail não configuradas no arquivo .env (EMAIL_SERVER_USER ou EMAIL_SERVER_PASSWORD vazios).',
+    };
+  }
+
+  try {
+    const transporter = criarTransporter();
+    await transporter.verify();
+    return { ok: true, message: 'Conexão e autenticação com o servidor de e-mail estabelecidas com sucesso!' };
+  } catch (err: unknown) {
+    const error = err as { code?: string; message?: string; response?: string };
+    console.error('❌ Falha ao verificar conexão SMTP:', error);
+    let detalhe = error?.message || 'Erro desconhecido ao conectar ao servidor SMTP.';
+
+    if (error?.code === 'EAUTH' || detalhe.includes('Username and Password not accepted')) {
+      detalhe = 'Falha de autenticação. Verifique se o e-mail e a Senha de Aplicativo (App Password) estão corretos no .env.';
+    } else if (error?.code === 'ESOCKET' || error?.code === 'ETIMEDOUT') {
+      detalhe = `Não foi possível conectar ao servidor SMTP (${process.env.EMAIL_SERVER_HOST || 'smtp.gmail.com'}:${process.env.EMAIL_SERVER_PORT || 587}). Verifique a porta e as regras de firewall.`;
+    }
+
+    return { ok: false, message: detalhe };
+  }
+}
+
+/**
+ * Envia o e-mail com link e token de redefinição de senha.
+ */
 export async function enviarEmailRedefinicao(email: string, token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  let baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!baseUrl && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    baseUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  } else if (!baseUrl && process.env.VERCEL_URL) {
+    baseUrl = `https://${process.env.VERCEL_URL}`;
+  } else if (!baseUrl) {
+    baseUrl = 'http://localhost:3000';
+  }
+  baseUrl = baseUrl.replace(/\/$/, '');
   const resetUrl = `${baseUrl}/redefinir-senha?token=${token}`;
+  const from = process.env.EMAIL_FROM || (process.env.EMAIL_SERVER_USER ? `"CondomínioTech" <${process.env.EMAIL_SERVER_USER}>` : '"CondomínioTech" <nao-responda@condominiotech.com>');
 
   const html = `
     <!DOCTYPE html>
@@ -60,14 +128,16 @@ export async function enviarEmailRedefinicao(email: string, token: string) {
                       </td>
                     </tr>
                   </table>
+                  
                   <div style="background-color: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 24px; word-break: break-all;">
                     <p style="margin: 0 0 6px; font-size: 11px; color: #64748b;">Se o botão não funcionar, copie e cole o link no seu navegador:</p>
                     <a href="${resetUrl}" target="_blank" style="font-size: 12px; color: #38bdf8; text-decoration: underline;">
                       ${resetUrl}
                     </a>
                   </div>
+
                   <p style="margin: 0; font-size: 12px; line-height: 18px; color: #64748b;">
-                    Se você não solicitou a redefinição de senha, nenhuma ação é necessária. Sua conta permanecerá em segurança.
+                    Se você não solicitou a redefinição de senha, ignore esta mensagem. Sua conta permanece segura.
                   </p>
                 </td>
               </tr>
@@ -86,25 +156,32 @@ export async function enviarEmailRedefinicao(email: string, token: string) {
     </html>
   `;
 
-  if (!host) {
-    console.log('\n======================================================');
-    console.log('📧 [EMAIL MOCK / DEV] Link de redefinição de senha:');
-    console.log(resetUrl);
-    console.log('======================================================\n');
+  // Se não houver credenciais configuradas no .env
+  if (!isEmailConfigured()) {
+    console.warn('\n⚠️ [CONDOMINIO-TECH AVISO DE E-MAIL]');
+    console.warn('As credenciais de envio de e-mail (EMAIL_SERVER_USER / EMAIL_SERVER_PASSWORD) não estão preenchidas no arquivo .env.');
+    console.warn('O link gerado para redefinição foi:');
+    console.warn(`🔗 ${resetUrl}\n`);
+
+    if (process.env.NODE_ENV !== 'production') {
+      return { mock: true, resetUrl };
+    }
+    throw new Error('Serviço de envio de e-mail não configurado no servidor.');
   }
 
   try {
-    return await mailTransporter.sendMail({
+    const transporter = criarTransporter();
+    const info = await transporter.sendMail({
       from,
       to: email,
       subject: 'Redefinição de Senha - CondomínioTech',
       html,
     });
-  } catch (error) {
-    console.error('Erro ao enviar e-mail de redefinição:', error);
-    if (process.env.NODE_ENV !== 'production') {
-      return { mock: true, resetUrl };
-    }
-    throw new Error('Falha ao enviar e-mail de redefinição.');
+
+    console.log(`✅ [EMAIL ENVIADO COM SUCESSO] Destinatário: ${email} | MessageID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId, resetUrl };
+  } catch (error: unknown) {
+    console.error('❌ [ERRO AO ENVIAR E-MAIL VIA SMTP]:', error);
+    throw error;
   }
 }
