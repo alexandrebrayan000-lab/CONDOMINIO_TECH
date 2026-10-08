@@ -45,11 +45,6 @@ export function DashboardLayoutClient({
     }
   };
 
-  const closeSidebar = () => {
-    setMobileOpen(false);
-    setDesktopOpen(false);
-  };
-
   const menus = {
     MORADOR: [
       { label: '📊 Painel Geral', href: '/dashboard', badge: 0 },
@@ -107,7 +102,7 @@ export function DashboardLayoutClient({
         <div className="w-[216px] flex flex-col justify-between min-h-full">
           <div>
             {/* Logo & Perfil de Operador */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6">
               <Link
                 href={userType === 'SINDICO' ? '/dashboard/admin' : userType === 'PORTARIA' ? '/dashboard/portaria' : '/dashboard'}
                 className="flex items-center gap-2.5 group"
@@ -123,19 +118,6 @@ export function DashboardLayoutClient({
                   CondomínioTech
                 </span>
               </Link>
-
-              {/* Botão para ocultar/fechar a sidebar (visível em ambos) */}
-              <button
-                type="button"
-                onClick={closeSidebar}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition cursor-pointer"
-                aria-label="Ocultar menu lateral"
-                title="Ocultar menu lateral"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
 
             <div className="mt-2.5 mb-6 flex items-center gap-2">
