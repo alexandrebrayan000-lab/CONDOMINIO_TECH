@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { fazerLogout } from '@/lib/auth-actions';
@@ -27,6 +28,12 @@ export function DashboardLayoutClient({
   notificacoes,
 }: DashboardLayoutClientProps) {
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Fecha a sidebar ao navegar entre rotas
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   const menus = {
     MORADOR: [
@@ -56,15 +63,29 @@ export function DashboardLayoutClient({
   const unreadTotal = userType === 'SINDICO' ? chamadosPendentesCount : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row relative">
+      {/* Overlay escuro de fundo no mobile */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden transition-opacity duration-300 ${
+          sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
+
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-slate-900/95 border-b md:border-b-0 md:border-r border-slate-800 p-5 flex flex-col justify-between backdrop-blur-md">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/95 border-r border-slate-800 p-5 flex flex-col justify-between backdrop-blur-md transition-transform duration-300 ease-in-out overflow-y-auto md:static md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div>
           {/* Logo & Perfil de Operador */}
-          <div className="mb-6 flex items-center justify-between md:block">
+          <div className="mb-6 flex items-center justify-between">
             <Link
               href={userType === 'SINDICO' ? '/dashboard/admin' : userType === 'PORTARIA' ? '/dashboard/portaria' : '/dashboard'}
               className="flex items-center gap-2.5 group"
+              onClick={() => setSidebarOpen(false)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -76,19 +97,32 @@ export function DashboardLayoutClient({
                 CondomínioTech
               </span>
             </Link>
-            <div className="mt-2.5 flex items-center gap-2">
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${
-                  userType === 'SINDICO'
-                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                    : userType === 'PORTARIA'
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
-                }`}
-              >
-                ● {userType}
-              </span>
-            </div>
+
+            {/* Botão para fechar no mobile */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 md:hidden"
+              aria-label="Fechar menu lateral"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="mt-2.5 mb-6 flex items-center gap-2">
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border tracking-wider uppercase ${
+                userType === 'SINDICO'
+                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  : userType === 'PORTARIA'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+              }`}
+            >
+              ● {userType}
+            </span>
           </div>
 
           {/* Navegação Principal */}
@@ -99,6 +133,7 @@ export function DashboardLayoutClient({
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => setSidebarOpen(false)}
                   className={`px-3.5 py-2.5 rounded-xl text-sm font-medium transition flex items-center justify-between ${
                     isActive
                       ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 font-semibold shadow-inner'
@@ -127,7 +162,10 @@ export function DashboardLayoutClient({
           </div>
 
           <button
-            onClick={async () => await fazerLogout()}
+            onClick={async () => {
+              setSidebarOpen(false);
+              await fazerLogout();
+            }}
             className="text-left text-xs text-red-400 hover:text-red-300 font-medium px-3 py-2 rounded-lg hover:bg-red-500/10 transition w-full cursor-pointer flex items-center gap-2"
           >
             <span>🚪</span>
@@ -138,9 +176,40 @@ export function DashboardLayoutClient({
 
       {/* Main Wrapper com Topbar */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Topbar com z-index de camada superior para dropdown */}
-        <header className="relative z-50 h-16 bg-slate-900/80 border-b border-slate-800/80 px-8 flex items-center justify-between backdrop-blur-md">
+        {/* Topbar com z-index adequado para dropdown */}
+        <header className="relative z-30 h-16 bg-slate-900/80 border-b border-slate-800/80 px-4 sm:px-8 flex items-center justify-between backdrop-blur-md">
           <div className="flex items-center gap-3">
+            {/* Botão Hambúrguer Mobile */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              className="p-2 -ml-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 focus:outline-none transition md:hidden"
+              aria-label={sidebarOpen ? 'Fechar menu lateral' : 'Abrir menu lateral'}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {sidebarOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
+
             <span className="text-xs text-slate-400 hidden sm:inline">Portal do Condomínio</span>
             <span className="text-xs text-slate-600 hidden sm:inline">/</span>
             <span className="text-xs font-semibold text-cyan-400 capitalize">
